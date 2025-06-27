@@ -1,6 +1,8 @@
 package com.theendercore.ventureland_utils
 
 import com.mojang.brigadier.CommandDispatcher
+import com.mojang.brigadier.builder.ArgumentBuilder
+import com.mojang.brigadier.tree.CommandNode
 import com.theendercore.ventureland_utils.config.TemplateConfig
 import me.fzzyhmstrs.fzzy_config.api.ConfigApi
 import me.fzzyhmstrs.fzzy_config.api.RegisterType
@@ -8,6 +10,7 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents
+import net.minecraft.client.MinecraftClient
 import net.minecraft.command.CommandBuildContext
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NbtOps
@@ -29,15 +32,36 @@ object VenturelandUtilsClient {
     fun init() {
         log.info("Hello from Client")
         ClientCommandRegistrationCallback.EVENT.register(::command)
-        ClientReceiveMessageEvents.GAME.register (::processMessage)
+        ClientReceiveMessageEvents.GAME.register(::processMessage)
+        VUHudRenderer.init()
     }
-    fun processMessage(text: Text, overlay: Boolean){
+
+    const val SCROLL_OF_LIFE = "Scroll of life saves you from death"
+    val REVENGE = Regex("(Revenge is now on cooldown against mobs for )(\\d+)(s)")
+
+    fun processMessage(text: Text, overlay: Boolean) {
         if (overlay) return
-        println(text.toString())
+        val player = MinecraftClient.getInstance().player ?: return
+
+        val textClean = text.string.trim()
+        if (textClean.isEmpty()) return
+
+        if (SCROLL_OF_LIFE == textClean) {
+            player.sendMessage(Text.literal("Received Scroll of life message!"), false)
+            VUHudRenderer.scrollOfLifeCooldown = 5 * 60 * 20
+            return
+        }
+        if (REVENGE.matches(textClean)) {
+            println( REVENGE.findAll(textClean).first().groups.map { it?.value })
+            val cooldown = REVENGE.findAll(textClean).first().groups[2]?.value?.toInt() ?: 10
+            player.sendMessage(Text.literal("Received Revenge message! $cooldown"), false)
+            VUHudRenderer.revengeCooldown = cooldown * 20
+        }
     }
 
     fun command(dispatcher: CommandDispatcher<FabricClientCommandSource>, registry: CommandBuildContext) {
-       val root = literal("dump_item").executes {
+        val root = literal("vutils").buildChildOf(dispatcher.root)
+        literal("dump_item").executes {
             val player = it.source.player ?: return@executes 0
 
             val stack = player.mainHandStack
@@ -54,9 +78,38 @@ object VenturelandUtilsClient {
             }
             player.sendMessage(Text.literal("Stack data: ${data.getOrThrow()}"), false)
             1
-        }.build()
-        dispatcher.root.addChild(root)
+        }.buildChildOf(root)
+
+        literal("clear").executes {
+            VUHudRenderer.scrollOfLifeCooldown = 0
+            VUHudRenderer.revengeCooldown = 0
+            1
+        }.buildChildOf(root)
+
+        val test = literal("test").buildChildOf(root)
+        literal("cooldown").executes {
+            VUHudRenderer.scrollOfLifeCooldown = 80
+            VUHudRenderer.revengeCooldown = 80
+            1
+        }.buildChildOf(test)
+        literal("message").executes {
+            processMessage(Text.literal(SCROLL_OF_LIFE), false)
+            processMessage(Text.literal("Revenge is now on cooldown against mobs for 69s"), false)
+            1
+        }.buildChildOf(test)
+
+
     }
+
+    fun <S> CommandNode<S>.childOf(node: CommandNode<S>): CommandNode<S> {
+        node.addChild(this)
+        return this
+    }
+
+    fun <S, Q : ArgumentBuilder<S, Q>> ArgumentBuilder<S, Q>.buildChildOf(node: CommandNode<S>): CommandNode<S> {
+        return this.build().childOf(node)
+    }
+
 
     fun id(path: String): Identifier = Identifier.of(MODID, path)
 }
