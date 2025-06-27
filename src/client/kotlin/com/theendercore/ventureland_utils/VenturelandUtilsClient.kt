@@ -27,7 +27,7 @@ object VenturelandUtilsClient {
     @JvmField
     val log: Logger = LoggerFactory.getLogger(VenturelandUtilsClient::class.simpleName)
 
-//    @JvmField
+    //    @JvmField
 //    var config = ConfigApi.registerAndLoadConfig(::TemplateConfig, RegisterType.CLIENT)
     fun init() {
         log.info("Hello from Client")
@@ -60,26 +60,6 @@ object VenturelandUtilsClient {
 
     fun command(dispatcher: CommandDispatcher<FabricClientCommandSource>, registry: CommandBuildContext) {
         val root = literal("vutils").buildChildOf(dispatcher.root)
-        literal("dump_item").executes {
-            val player = it.source.player ?: return@executes 0
-
-            val stack = player.mainHandStack
-            if (stack.isEmpty) return@executes 0
-
-            val ops = player.world.registryManager.createSerializationContext(NbtOps.INSTANCE)
-            val data = ItemStack.CODEC.encodeStart(ops, stack)
-            if (data.isError) {
-                player.sendMessage(
-                    Text.literal("Error while trying to get hand data: ${data.error().get().message()}")
-                        .formatted(Formatting.RED), false
-                )
-                return@executes 0
-            }
-            player.sendMessage(Text.literal("Stack data: ${data.getOrThrow()}"), false)
-            player.kill()
-            1
-        }.buildChildOf(root)
-
         literal("evaluate_item").executes {
             val player = it.source.player ?: return@executes 0
 
@@ -98,30 +78,50 @@ object VenturelandUtilsClient {
             1
         }.buildChildOf(root)
 
-        val post = literal("post").buildChildOf(root)
-        argument("message", StringArgumentType.greedyString()).executes {
-            it.source.sendFeedback(Text.literal(StringArgumentType.getString(it, "message")))
-            1
-        }.buildChildOf(post)
-
-
         literal("clear").executes {
             VUHudRenderer.scrollOfLifeCooldown = 0
             VUHudRenderer.revengeCooldown = 0
             1
         }.buildChildOf(root)
 
-        val test = literal("test").buildChildOf(root)
-        literal("cooldown").executes {
-            VUHudRenderer.scrollOfLifeCooldown = 80
-            VUHudRenderer.revengeCooldown = 80
-            1
-        }.buildChildOf(test)
-        literal("message").executes {
-            processMessage(Text.literal(SCROLL_OF_LIFE), false)
-            processMessage(Text.literal("Revenge is now on cooldown against mobs for 69s"), false)
-            1
-        }.buildChildOf(test)
+        if (isDev()) {
+            literal("dump_item").executes {
+                val player = it.source.player ?: return@executes 0
+
+                val stack = player.mainHandStack
+                if (stack.isEmpty) return@executes 0
+
+                val ops = player.world.registryManager.createSerializationContext(NbtOps.INSTANCE)
+                val data = ItemStack.CODEC.encodeStart(ops, stack)
+                if (data.isError) {
+                    player.sendMessage(
+                        Text.literal("Error while trying to get hand data: ${data.error().get().message()}")
+                            .formatted(Formatting.RED), false
+                    )
+                    return@executes 0
+                }
+                player.sendMessage(Text.literal("Stack data: ${data.getOrThrow()}"), false)
+                1
+            }.buildChildOf(root)
+
+            val post = literal("post").buildChildOf(root)
+            argument("message", StringArgumentType.greedyString()).executes {
+                it.source.sendFeedback(Text.literal(StringArgumentType.getString(it, "message")))
+                1
+            }.buildChildOf(post)
+
+            val test = literal("test").buildChildOf(root)
+            literal("cooldown").executes {
+                VUHudRenderer.scrollOfLifeCooldown = 80
+                VUHudRenderer.revengeCooldown = 80
+                1
+            }.buildChildOf(test)
+            literal("message").executes {
+                processMessage(Text.literal(SCROLL_OF_LIFE), false)
+                processMessage(Text.literal("Revenge is now on cooldown against mobs for 69s"), false)
+                1
+            }.buildChildOf(test)
+        }
     }
 
     fun id(path: String): Identifier = Identifier.of(MODID, path)
