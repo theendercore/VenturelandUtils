@@ -23,7 +23,7 @@ fun getCosmicWard(stack: ItemStack): Int? {
     val lore = stack.get(DataComponentTypes.LORE) ?: return null
 
     var qualityLine: Text = Text.literal("Helo!")
-    for (line in lore.lines()) {
+    for (line in lore.lines().reversed()) {
         if (line.siblings.isEmpty()) continue
         if (line.siblings.firstOrNull()?.string == "Quality: ") {
             qualityLine = line
