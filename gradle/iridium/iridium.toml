@@ -1,8 +1,8 @@
-projectTitle = "Team Voided Template"
-modId = "template"
-modVersion = "1.0.0"
-group = "org.teamvoided"
-githubRepo = "Teamvoided/TeamVoidedTemplateMod"
+projectTitle = "Ventureland Utils"
+modId = "ventureland_utils"
+modVersion = "1.0.0-beta.1"
+group = "com.theendercore"
+githubRepo = "theendercore/VenturelandUtils"
 discordServerInviteId = "KZ5Q364hEg"
 authors = [ "TheEnderCore" ]
 majorMinecraftVersion = ">=1.21"
@@ -12,7 +12,7 @@ fabricApiVersion = "0.116.0+1.21.1"
 fabricLangKotlinVersion = "1.13.2+kotlin.2.1.20"
 license = "MIT"
 modules = [ ]
-modDescription = "Template Mod Description"
+modDescription = "Utils for Ventureland server. Commisoned by Wiatrak16."
 # Modmenu badges, values can be: [ library, deprecated ]
 badges = [ ]
 disableKotlin = false
