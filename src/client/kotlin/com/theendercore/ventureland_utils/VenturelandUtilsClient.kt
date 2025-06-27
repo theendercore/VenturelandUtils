@@ -7,6 +7,7 @@ import me.fzzyhmstrs.fzzy_config.api.RegisterType
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource
+import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents
 import net.minecraft.command.CommandBuildContext
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NbtOps
@@ -29,6 +30,11 @@ object VenturelandUtilsClient {
     fun init() {
         log.info("Hello from Client")
         ClientCommandRegistrationCallback.EVENT.register(::command)
+        ClientReceiveMessageEvents.GAME.register (::processMessage)
+    }
+    fun processMessage(text: Text, overlay: Boolean){
+        if (overlay) return
+        println(text.toString())
     }
 
     fun command(dispatcher: CommandDispatcher<FabricClientCommandSource>, registry: CommandBuildContext) {
