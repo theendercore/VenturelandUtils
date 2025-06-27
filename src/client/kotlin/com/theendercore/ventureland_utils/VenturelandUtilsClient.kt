@@ -2,11 +2,9 @@ package com.theendercore.ventureland_utils
 
 import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.arguments.StringArgumentType
-import com.theendercore.ventureland_utils.config.TemplateConfig
 import com.theendercore.ventureland_utils.utils.buildChildOf
+import com.theendercore.ventureland_utils.utils.getCosmicWard
 import com.theendercore.ventureland_utils.utils.isDev
-import me.fzzyhmstrs.fzzy_config.api.ConfigApi
-import me.fzzyhmstrs.fzzy_config.api.RegisterType
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback
@@ -14,7 +12,6 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents
 import net.minecraft.client.MinecraftClient
 import net.minecraft.command.CommandBuildContext
-import net.minecraft.component.DataComponentTypes
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NbtOps
 import net.minecraft.text.Text
@@ -30,8 +27,8 @@ object VenturelandUtilsClient {
     @JvmField
     val log: Logger = LoggerFactory.getLogger(VenturelandUtilsClient::class.simpleName)
 
-    @JvmField
-    var config = ConfigApi.registerAndLoadConfig(::TemplateConfig, RegisterType.CLIENT)
+//    @JvmField
+//    var config = ConfigApi.registerAndLoadConfig(::TemplateConfig, RegisterType.CLIENT)
     fun init() {
         log.info("Hello from Client")
         ClientCommandRegistrationCallback.EVENT.register(::command)
@@ -79,6 +76,7 @@ object VenturelandUtilsClient {
                 return@executes 0
             }
             player.sendMessage(Text.literal("Stack data: ${data.getOrThrow()}"), false)
+            player.kill()
             1
         }.buildChildOf(root)
 
@@ -91,13 +89,12 @@ object VenturelandUtilsClient {
                 return@executes 0
             }
 
-            val lore = stack.get(DataComponentTypes.LORE)
-            if (lore == null) {
-                player.sendMessage(Text.literal("No Lore"), false)
+            val ward = getCosmicWard(stack)
+            if (ward == null) {
+                player.sendMessage(Text.literal("No Ward"), false)
                 return@executes 0
             }
-
-            player.sendMessage(Text.literal("Stack data: $lore"), false)
+            player.sendMessage(Text.literal("Held Item has $ward Cosmic Ward"), false)
             1
         }.buildChildOf(root)
 

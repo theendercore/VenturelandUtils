@@ -1,10 +1,11 @@
 package com.theendercore.ventureland_utils
 
+import com.theendercore.ventureland_utils.utils.getCosmicWard
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.GuiGraphics
-import net.minecraft.client.render.DeltaTracker
+import net.minecraft.item.ItemStack
 import net.minecraft.text.Text
 import net.minecraft.util.Formatting
 
@@ -17,10 +18,55 @@ object VUHudRenderer {
             if (scrollOfLifeCooldown > 0) scrollOfLifeCooldown--
             if (revengeCooldown > 0) revengeCooldown--
         }
-        HudRenderCallback.EVENT.register(::render)
+        HudRenderCallback.EVENT.register { gui, tick ->
+            renderCooldowns(gui)
+            renderCosmicWard(gui)
+        }
     }
 
-    fun render(gui: GuiGraphics, tick: DeltaTracker) {
+    fun renderCosmicWard(gui: GuiGraphics) {
+        val client = MinecraftClient.getInstance()
+        val player = client.player ?: return
+        val infoMap = mutableMapOf<ItemStack, Text>()
+
+        val leggings = player.inventory.armor[1]
+        if (!leggings.isEmpty) {
+            val ward = getCosmicWard(leggings)
+            if (ward != null) {
+                infoMap.put(leggings, Text.literal("⚡$ward").formatted(Formatting.DARK_BLUE))
+            }
+        }
+        val chestplate = player.inventory.armor[2]
+        if (!chestplate.isEmpty) {
+            val ward = getCosmicWard(chestplate)
+            if (ward != null) {
+                infoMap.put(chestplate, Text.literal("⚡$ward").formatted(Formatting.DARK_BLUE))
+            }
+        }
+        val slotNumberUno = player.inventory.main[0]
+        if (!slotNumberUno.isEmpty) {
+            val ward = getCosmicWard(slotNumberUno)
+            if (ward != null) {
+                infoMap.put(slotNumberUno, Text.literal("⚡$ward").formatted(Formatting.DARK_BLUE))
+            }
+        }
+
+        val font = client.textRenderer
+        for ((idx, pair) in infoMap.toList().withIndex()) {
+            val y = gui.scaledWindowHeight - 20
+            val x = (gui.scaledWindowWidth / 2) - 116 - (idx * 28)
+
+            gui.matrices.push()
+            gui.matrices.translate(0f, 0f, -1000f)
+            gui.drawItem(pair.first, x, y)
+            gui.matrices.pop()
+
+            gui.drawCenteredShadowedText(font, pair.second, x + 7, (y + font.fontHeight), 0x0)
+        }
+
+    }
+
+    fun renderCooldowns(gui: GuiGraphics) {
         val textList = mutableListOf<Text>()
         if (scrollOfLifeCooldown > 0)
             textList.add(
@@ -40,7 +86,7 @@ object VUHudRenderer {
                 font,
                 text,
                 gui.scaledWindowWidth / 2 + 104,
-                gui.scaledWindowHeight - (font.fontHeight/2) - ((idx + 1) * (font.fontHeight * 1.25).toInt()),
+                gui.scaledWindowHeight - (font.fontHeight / 2) - ((idx + 1) * (font.fontHeight * 1.25).toInt()),
                 0x0
             )
         }
