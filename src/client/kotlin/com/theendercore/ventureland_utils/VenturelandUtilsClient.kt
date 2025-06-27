@@ -16,7 +16,6 @@ import net.minecraft.util.Formatting
 import net.minecraft.util.Identifier
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.teamvoided.creative_works.util.buildChildOf
 
 @Suppress("unused")
 object VenturelandUtilsClient {
@@ -38,7 +37,7 @@ object VenturelandUtilsClient {
     }
 
     fun command(dispatcher: CommandDispatcher<FabricClientCommandSource>, registry: CommandBuildContext) {
-        literal("dump_item").executes {
+       val root = literal("dump_item").executes {
             val player = it.source.player ?: return@executes 0
 
             val stack = player.mainHandStack
@@ -55,7 +54,8 @@ object VenturelandUtilsClient {
             }
             player.sendMessage(Text.literal("Stack data: ${data.getOrThrow()}"), false)
             1
-        }.buildChildOf(dispatcher.root)
+        }.build()
+        dispatcher.root.addChild(root)
     }
 
     fun id(path: String): Identifier = Identifier.of(MODID, path)
