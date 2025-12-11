@@ -4,6 +4,7 @@
   "package": "com.theendercore.ventureland_utils.mixin",
   "compatibilityLevel": "JAVA_21",
   "client": [
+    "EntityRenderDispatcherMixin"
   ],
   "injectors": {
     "defaultRequire": 1

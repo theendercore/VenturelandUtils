@@ -2,9 +2,12 @@ package com.theendercore.ventureland_utils
 
 import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.arguments.StringArgumentType
+import com.theendercore.ventureland_utils.config.VenturelandUtilsConfig
 import com.theendercore.ventureland_utils.utils.buildChildOf
 import com.theendercore.ventureland_utils.utils.getCosmicWard
 import com.theendercore.ventureland_utils.utils.isDev
+import me.fzzyhmstrs.fzzy_config.api.ConfigApi
+import me.fzzyhmstrs.fzzy_config.api.RegisterType
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback
@@ -27,8 +30,8 @@ object VenturelandUtilsClient {
     @JvmField
     val log: Logger = LoggerFactory.getLogger(VenturelandUtilsClient::class.simpleName)
 
-    //    @JvmField
-//    var config = ConfigApi.registerAndLoadConfig(::TemplateConfig, RegisterType.CLIENT)
+    @JvmField
+    var config = ConfigApi.registerAndLoadConfig(::VenturelandUtilsConfig, RegisterType.CLIENT)
     fun init() {
         log.info("Hello from Client")
         ClientCommandRegistrationCallback.EVENT.register(::command)
