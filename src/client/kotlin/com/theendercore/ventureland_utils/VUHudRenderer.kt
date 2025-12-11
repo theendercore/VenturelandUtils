@@ -1,5 +1,6 @@
 package com.theendercore.ventureland_utils
 
+import com.theendercore.ventureland_utils.VenturelandUtilsClient.config
 import com.theendercore.ventureland_utils.utils.getCosmicWard
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback
@@ -33,21 +34,21 @@ object VUHudRenderer {
         if (!leggings.isEmpty) {
             val ward = getCosmicWard(leggings)
             if (ward != null) {
-                infoMap.put(leggings, Text.literal("⚡$ward").formatted(Formatting.DARK_BLUE))
+                infoMap[leggings] = Text.literal("⚡$ward").setColor(config.cosmicWardTextColor.toInt())
             }
         }
         val chestplate = player.inventory.armor[2]
         if (!chestplate.isEmpty) {
             val ward = getCosmicWard(chestplate)
             if (ward != null) {
-                infoMap.put(chestplate, Text.literal("⚡$ward").formatted(Formatting.DARK_BLUE))
+                infoMap[chestplate] = Text.literal("⚡$ward").setColor(config.cosmicWardTextColor.toInt())
             }
         }
         val slotNumberUno = player.inventory.main[0]
         if (!slotNumberUno.isEmpty) {
             val ward = getCosmicWard(slotNumberUno)
             if (ward != null) {
-                infoMap.put(slotNumberUno, Text.literal("⚡$ward").formatted(Formatting.DARK_BLUE))
+                infoMap[slotNumberUno] = Text.literal("⚡$ward").setColor(config.cosmicWardTextColor.toInt())
             }
         }
 
