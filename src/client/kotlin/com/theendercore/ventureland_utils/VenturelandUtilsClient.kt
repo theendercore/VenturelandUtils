@@ -49,6 +49,10 @@ object VenturelandUtilsClient {
         val textClean = text.string.trim()
         if (textClean.isEmpty()) return
 
+        if (config.debugInfo) {
+            log.info("Message log: [{}]", textClean)
+        }
+
         if (SCROLL_OF_LIFE == textClean) {
             if (isDev()) player.sendMessage(Text.literal("Received Scroll of life message!"), false)
             VUHudRenderer.scrollOfLifeCooldown = 5 * 60 * 20

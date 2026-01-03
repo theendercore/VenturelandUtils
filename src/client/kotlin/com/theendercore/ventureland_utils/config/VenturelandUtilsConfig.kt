@@ -24,4 +24,6 @@ class VenturelandUtilsConfig : Config(id(MODID)) {
 
     @Comment("Hides the hitboxes for items that are used to custom display texts like HP")
     var hideDisplayItemHitboxes = true
+
+    var debugInfo = false
 }
