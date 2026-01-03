@@ -13,11 +13,13 @@ import net.minecraft.util.Formatting
 object VUHudRenderer {
     var scrollOfLifeCooldown = 0
     var revengeCooldown = 0
+    var resCooldown = 0
 
     fun init() {
         ClientTickEvents.END_CLIENT_TICK.register {
             if (scrollOfLifeCooldown > 0) scrollOfLifeCooldown--
             if (revengeCooldown > 0) revengeCooldown--
+            if (resCooldown > 0) resCooldown--
         }
         HudRenderCallback.EVENT.register { gui, tick ->
             renderCooldowns(gui)
@@ -78,6 +80,11 @@ object VUHudRenderer {
             textList.add(
                 Text.literal("Revenge cooldown: ${(revengeCooldown / 20).formatTime()}")
                     .formatted(Formatting.DARK_RED)
+            )
+        if (resCooldown > 0)
+            textList.add(
+                Text.literal("Resurrection cooldown: ${(resCooldown / 20).formatTime()}")
+                    .formatted(Formatting.RED)
             )
         if (textList.isEmpty()) return
 

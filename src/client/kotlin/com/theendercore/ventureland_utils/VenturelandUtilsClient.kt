@@ -40,6 +40,7 @@ object VenturelandUtilsClient {
     }
 
     const val SCROLL_OF_LIFE = "Scroll of life saves you from death"
+    const val RES_SCROLL = "revived."
     val REVENGE = Regex("(Revenge is now on cooldown against mobs for )(\\d+)(s)")
 
     fun processMessage(text: Text, overlay: Boolean) {
@@ -49,7 +50,7 @@ object VenturelandUtilsClient {
         val textClean = text.string.trim()
         if (textClean.isEmpty()) return
 
-        if (config.debugInfo) {
+        if (isDev()) {
             log.info("Message log: [{}]", textClean)
         }
 
@@ -62,6 +63,11 @@ object VenturelandUtilsClient {
             val cooldown = REVENGE.findAll(textClean).first().groups[2]?.value?.toInt() ?: 10
             if (isDev()) player.sendMessage(Text.literal("Received Revenge message! $cooldown"), false)
             VUHudRenderer.revengeCooldown = cooldown * 20
+        }
+        val resProc = textClean.split(" ")
+        if (resProc.size == 2 && resProc[1] == RES_SCROLL){
+            if (isDev()) player.sendMessage(Text.literal("Received Revive message!"), false)
+            VUHudRenderer.resCooldown = 100 * 20
         }
     }
 
@@ -88,6 +94,7 @@ object VenturelandUtilsClient {
         literal("clear").executes {
             VUHudRenderer.scrollOfLifeCooldown = 0
             VUHudRenderer.revengeCooldown = 0
+            VUHudRenderer.resCooldown = 0
             1
         }.buildChildOf(root)
 
@@ -121,11 +128,13 @@ object VenturelandUtilsClient {
             literal("cooldown").executes {
                 VUHudRenderer.scrollOfLifeCooldown = 80
                 VUHudRenderer.revengeCooldown = 80
+                VUHudRenderer.resCooldown = 80
                 1
             }.buildChildOf(test)
             literal("message").executes {
                 processMessage(Text.literal(SCROLL_OF_LIFE), false)
                 processMessage(Text.literal("Revenge is now on cooldown against mobs for 69s"), false)
+                processMessage(Text.literal("TheCrazyPerson revived."), false)
                 1
             }.buildChildOf(test)
         }

@@ -2,6 +2,7 @@ package com.theendercore.ventureland_utils.utils
 
 import com.mojang.brigadier.builder.ArgumentBuilder
 import com.mojang.brigadier.tree.CommandNode
+import com.theendercore.ventureland_utils.VenturelandUtilsClient.config
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.component.DataComponentTypes
 import net.minecraft.item.ItemStack
@@ -16,7 +17,7 @@ fun <S, Q : ArgumentBuilder<S, Q>> ArgumentBuilder<S, Q>.buildChildOf(node: Comm
     return this.build().childOf(node)
 }
 
-fun isDev() = FabricLoader.getInstance().isDevelopmentEnvironment
+fun isDev() = FabricLoader.getInstance().isDevelopmentEnvironment || config.debugInfo
 
 fun getCosmicWard(stack: ItemStack): Int? {
     if (stack.isEmpty) return null
