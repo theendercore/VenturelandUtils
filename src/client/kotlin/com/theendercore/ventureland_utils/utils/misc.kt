@@ -6,6 +6,7 @@ import com.theendercore.ventureland_utils.VenturelandUtilsClient.config
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.component.DataComponentTypes
 import net.minecraft.item.ItemStack
+import net.minecraft.text.MutableText
 import net.minecraft.text.Text
 
 fun <S> CommandNode<S>.childOf(node: CommandNode<S>): CommandNode<S> {
@@ -18,6 +19,15 @@ fun <S, Q : ArgumentBuilder<S, Q>> ArgumentBuilder<S, Q>.buildChildOf(node: Comm
 }
 
 fun isDev() = FabricLoader.getInstance().isDevelopmentEnvironment || config.debugInfo
+
+fun keyText(key: String, vararg args: Any?): MutableText = Text.translatable("ventureland_utils.text.$key", *args)
+
+
+fun wardExtraction(wardItem: ItemStack, exportMap: MutableMap<ItemStack, Text>) {
+    if (wardItem.isEmpty) return
+    val ward = getCosmicWard(wardItem) ?: return
+    exportMap[wardItem] = keyText("ward", ward).setColor(config.cosmicWardTextColor.toInt())
+}
 
 fun getCosmicWard(stack: ItemStack): Int? {
     if (stack.isEmpty) return null

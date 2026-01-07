@@ -1,27 +1,27 @@
 package com.theendercore.ventureland_utils
 
 import com.theendercore.ventureland_utils.VenturelandUtilsClient.config
-import com.theendercore.ventureland_utils.utils.getCosmicWard
+import com.theendercore.ventureland_utils.utils.keyText
+import com.theendercore.ventureland_utils.utils.wardExtraction
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.item.ItemStack
 import net.minecraft.text.Text
-import net.minecraft.util.Formatting
 
 object VUHudRenderer {
     var scrollOfLifeCooldown = 0
     var revengeCooldown = 0
-    var resCooldown = 0
+    var resurrectionCooldown = 0
 
     fun init() {
         ClientTickEvents.END_CLIENT_TICK.register {
             if (scrollOfLifeCooldown > 0) scrollOfLifeCooldown--
             if (revengeCooldown > 0) revengeCooldown--
-            if (resCooldown > 0) resCooldown--
+            if (resurrectionCooldown > 0) resurrectionCooldown--
         }
-        HudRenderCallback.EVENT.register { gui, tick ->
+        HudRenderCallback.EVENT.register { gui, _ ->
             renderCooldowns(gui)
             renderCosmicWard(gui)
         }
@@ -32,27 +32,9 @@ object VUHudRenderer {
         val player = client.player ?: return
         val infoMap = mutableMapOf<ItemStack, Text>()
 
-        val leggings = player.inventory.armor[1]
-        if (!leggings.isEmpty) {
-            val ward = getCosmicWard(leggings)
-            if (ward != null) {
-                infoMap[leggings] = Text.literal("⚡$ward").setColor(config.cosmicWardTextColor.toInt())
-            }
-        }
-        val chestplate = player.inventory.armor[2]
-        if (!chestplate.isEmpty) {
-            val ward = getCosmicWard(chestplate)
-            if (ward != null) {
-                infoMap[chestplate] = Text.literal("⚡$ward").setColor(config.cosmicWardTextColor.toInt())
-            }
-        }
-        val slotNumberUno = player.inventory.main[0]
-        if (!slotNumberUno.isEmpty) {
-            val ward = getCosmicWard(slotNumberUno)
-            if (ward != null) {
-                infoMap[slotNumberUno] = Text.literal("⚡$ward").setColor(config.cosmicWardTextColor.toInt())
-            }
-        }
+        wardExtraction(player.inventory.armor[1], infoMap) // Leggings
+        wardExtraction(player.inventory.armor[2], infoMap) // Chestplate
+        wardExtraction(player.inventory.main[0], infoMap) // Weapon
 
         val font = client.textRenderer
         for ((idx, pair) in infoMap.toList().withIndex()) {
@@ -66,33 +48,26 @@ object VUHudRenderer {
 
             gui.drawCenteredShadowedText(font, pair.second, x + 7, (y + font.fontHeight), 0x0)
         }
-
     }
 
     fun renderCooldowns(gui: GuiGraphics) {
         val textList = mutableListOf<Text>()
-        if (scrollOfLifeCooldown > 0)
-            textList.add(
-                Text.literal("Scroll of life cooldown: ${(scrollOfLifeCooldown / 20).formatTime()}")
-                    .formatted(Formatting.LIGHT_PURPLE)
-            )
-        if (revengeCooldown > 0)
-            textList.add(
-                Text.literal("Revenge cooldown: ${(revengeCooldown / 20).formatTime()}")
-                    .formatted(Formatting.DARK_RED)
-            )
-        if (resCooldown > 0)
-            textList.add(
-                Text.literal("Resurrection cooldown: ${(resCooldown / 20).formatTime()}")
-                    .formatted(Formatting.RED)
-            )
+        if (scrollOfLifeCooldown > 0) textList.add(
+            keyText("scroll_of_life", scrollOfLifeCooldown.formatTime()).setColor(config.scrollOfLifeColor.toInt())
+        )
+        if (revengeCooldown > 0) textList.add(
+            keyText("revenge", revengeCooldown.formatTime()).setColor(config.revengeColor.toInt())
+        )
+        if (resurrectionCooldown > 0) textList.add(
+            keyText("resurrection", resurrectionCooldown.formatTime()).setColor(config.resurrectionColor.toInt())
+        )
+
         if (textList.isEmpty()) return
 
         val font = MinecraftClient.getInstance().textRenderer
         for ((idx, text) in textList.withIndex()) {
             gui.drawShadowedText(
-                font,
-                text,
+                font, text,
                 gui.scaledWindowWidth / 2 + 104,
                 gui.scaledWindowHeight - (font.fontHeight / 2) - ((idx + 1) * (font.fontHeight * 1.25).toInt()),
                 0x0
@@ -100,5 +75,5 @@ object VUHudRenderer {
         }
     }
 
-    fun Int.formatTime(): String = String.format("%d:%02d", this / 60, this % 60)
+    fun Int.formatTime(): String = String.format("%d:%02d", (this / 20) / 60, (this / 20) % 60)
 }
