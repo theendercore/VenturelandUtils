@@ -21,9 +21,11 @@ class VenturelandUtilsConfig : Config(id(MODID)) {
     @Comment("Shows hitboxes for invisible mobs")
     var invisibleEntityHitboxes = true
 
-    @Comment("List of entity types that will not have there hitboxes when invisible")
-    var hitboxBlacklist =
-        ValidatedList(listOf(EntityType.ARMOR_STAND), ValidatedRegistryType.of(Registries.ENTITY_TYPE))
+    @Comment("List of entity types that will show hitboxes")
+    var hitboxBlacklist = ValidatedList(
+        listOf(EntityType.ARMOR_STAND, EntityType.WITHER, EntityType.ITEM_FRAME),
+        ValidatedRegistryType.of(Registries.ENTITY_TYPE)
+    )
 
     @Comment("Hides the hitboxes for items that are used to custom display texts like HP")
     var hideDisplayItemHitboxes = true

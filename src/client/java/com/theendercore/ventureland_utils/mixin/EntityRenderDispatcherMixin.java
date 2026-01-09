@@ -23,9 +23,9 @@ public class EntityRenderDispatcherMixin<E extends Entity> {
         return !config.getInvisibleEntityHitboxes();
     }
 
-    @Inject(method = "renderHitbox", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "renderHitbox", at = @At("HEAD"), cancellable = true, order = 800)
     private static void disableItemHitbox(MatrixStack matrices, VertexConsumer vertices, Entity entity, float tickDelta, float red, float green, float blue, CallbackInfo ci) {
-        if (config.getHideDisplayItemHitboxes() && entity instanceof ItemEntity && entity.hasVehicle()) {
+        if (config.getHideDisplayItemHitboxes() && entity instanceof ItemEntity && entity.hasVehicle() || config.getHitboxBlacklist().contains(entity.getType())) {
             ci.cancel();
         }
     }
