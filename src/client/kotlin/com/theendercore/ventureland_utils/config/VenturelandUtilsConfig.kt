@@ -22,7 +22,7 @@ class VenturelandUtilsConfig : Config(id(MODID)) {
     var invisibleEntityHitboxes = true
 
     @Comment("List of entity types that will not show hitboxes")
-    var hitboxBlacklist = ValidatedList(
+    var hitboxDenylist = ValidatedList(
         listOf(EntityType.ARMOR_STAND, EntityType.WITHER, EntityType.ITEM_FRAME),
         ValidatedRegistryType.of(Registries.ENTITY_TYPE)
     )

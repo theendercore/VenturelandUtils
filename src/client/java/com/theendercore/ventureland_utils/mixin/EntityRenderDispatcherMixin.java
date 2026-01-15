@@ -19,13 +19,13 @@ import static com.theendercore.ventureland_utils.VenturelandUtilsClient.config;
 public class EntityRenderDispatcherMixin<E extends Entity> {
     @ModifyExpressionValue(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;isInvisible()Z", ordinal = 1))
     boolean showHitboxesForInv(boolean original, @Local(argsOnly = true) E entity) {
-        if ((entity instanceof PlayerEntity) || config.getHitboxBlacklist().contains(entity.getType())) return original;
+        if ((entity instanceof PlayerEntity) || config.getHitboxDenylist().contains(entity.getType())) return original;
         return !config.getInvisibleEntityHitboxes();
     }
 
     @Inject(method = "renderHitbox", at = @At("HEAD"), cancellable = true, order = 800)
     private static void disableItemHitbox(MatrixStack matrices, VertexConsumer vertices, Entity entity, float tickDelta, float red, float green, float blue, CallbackInfo ci) {
-        if (config.getHideDisplayItemHitboxes() && entity instanceof ItemEntity && entity.hasVehicle() || config.getHitboxBlacklist().contains(entity.getType())) {
+        if (config.getHideDisplayItemHitboxes() && entity instanceof ItemEntity && entity.hasVehicle() || config.getHitboxDenylist().contains(entity.getType())) {
             ci.cancel();
         }
     }
